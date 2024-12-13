@@ -19,6 +19,7 @@
    of thread.h for details. */
 #define THREAD_MAGIC 0xcd6abf4b
 
+static int64_t idle_ticks = 0;
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
@@ -448,6 +449,13 @@ thread_get_recent_cpu (void)
   return 0;
 }
 
+
+/*used to calculate the CPU usage*/
+void 
+calculate_cpu_usage(int64_t start_ticks, int64_t end_ticks) {
+    int64_t total_ticks = end_ticks - start_ticks;
+    printf("CPU Usage: %.2f%%\n", (1.0 - (double)idle_ticks / total_ticks) * 100);
+}
 /* Idle thread.  Executes when no other thread is ready to run.
 
    The idle thread is initially put on the ready list by
@@ -469,7 +477,7 @@ idle (void *idle_started_ UNUSED)
       /* Let someone else run. */
       intr_disable ();
       thread_block ();
-
+      idle_ticks++;
       /* Re-enable interrupts and wait for the next one.
 
          The `sti' instruction disables interrupts until the
